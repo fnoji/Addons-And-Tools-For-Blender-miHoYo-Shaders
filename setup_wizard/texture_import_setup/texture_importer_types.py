@@ -3,16 +3,16 @@ from typing import List
 import bpy
 
 import os
-from setup_wizard.domain.material_identifier_service import PunishingGrayRavenMaterialIdentifierService
+from setup_wizard.domain.material_identifier_service import PunishingGrayRavenMaterialIdentifierService, WutheringWavesMaterialIdentifierService
 from setup_wizard.domain.game_types import GameType
 from setup_wizard.domain.shader_identifier_service import GenshinImpactShaders, HonkaiStarRailShaders, ShaderIdentifierService, \
     ShaderIdentifierServiceFactory
-from setup_wizard.domain.shader_material_names import JaredNytsPunishingGrayRavenShaderMaterialNames, StellarToonShaderMaterialNames, V3_BonnyFestivityGenshinImpactMaterialNames, V2_FestivityGenshinImpactMaterialNames, \
+from setup_wizard.domain.shader_material_names import JaredNytsWutheringWavesShaderMaterialNames, JaredNytsPunishingGrayRavenShaderMaterialNames, StellarToonShaderMaterialNames, V3_BonnyFestivityGenshinImpactMaterialNames, V2_FestivityGenshinImpactMaterialNames, \
     ShaderMaterialNames, Nya222HonkaiStarRailShaderMaterialNames
-from setup_wizard.domain.shader_node_names import JaredNyts_PunishingGrayRavenNodeNames, StellarToonShaderNodeNames, V2_GenshinShaderNodeNames, V3_GenshinShaderNodeNames
+from setup_wizard.domain.shader_node_names import JaredNyts_WutheringWavesNodeNames, JaredNyts_PunishingGrayRavenNodeNames, StellarToonShaderNodeNames, V2_GenshinShaderNodeNames, V3_GenshinShaderNodeNames
 
 from setup_wizard.import_order import get_actual_material_name_for_dress
-from setup_wizard.texture_import_setup.texture_node_names import JaredNytsPunishingGrayRavenTextureNodeNames, Nya222HonkaiStarRailTextureNodeNames, StellarToonTextureNodeNames, TextureNodeNames
+from setup_wizard.texture_import_setup.texture_node_names import JaredNytsWutheringWavesTextureNodeNames, JaredNytsPunishingGrayRavenTextureNodeNames, Nya222HonkaiStarRailTextureNodeNames, StellarToonTextureNodeNames, TextureNodeNames
 
 
 class TextureImporterType(Enum):
@@ -22,6 +22,7 @@ class TextureImporterType(Enum):
     HSR_AVATAR = auto()
     PGR_AVATAR = auto()
     PGR_CHIBI = auto()
+    WW_AVATAR = auto()
 
 
 class TextureType(Enum):
@@ -69,6 +70,12 @@ class TextureImporterFactory:
             if texture_importer_type == TextureImporterType.PGR_AVATAR:
                 return PunishingGrayRavenAvatarTextureImporter(JaredNytsPunishingGrayRavenShaderMaterialNames, 
                                                                JaredNytsPunishingGrayRavenTextureNodeNames)
+            else:
+                print(f'Unknown TextureImporterType: {texture_importer_type}')
+        elif game_type is GameType.WUTHERING_WAVES:
+            if texture_importer_type == TextureImporterType.WW_AVATAR:
+                return WutheringWavesAvatarTextureImporter(JaredNytsWutheringWavesShaderMaterialNames, 
+                                                           JaredNytsWutheringWavesTextureNodeNames)
             else:
                 print(f'Unknown TextureImporterType: {texture_importer_type}')
         else:
@@ -937,7 +944,6 @@ class HonkaiStarRailAvatarTextureImporter(HonkaiStarRailTextureImporter):
                     print(f'WARN: Ignoring texture {file}')
             break  # IMPORTANT: We os.walk which also traverses through folders...we just want the files
 
-
 class PunishingGrayRavenTextureImporter(GenshinTextureImporter):
     def __init__(self, game_type: GameType, character_type: TextureImporterType, texture_node_names: TextureNodeNames):
         super().__init__(game_type, character_type)
@@ -983,8 +989,8 @@ class PunishingGrayRavenTextureImporter(GenshinTextureImporter):
 
         if lut_node:
             lut_node.image = img
-            shader_node_name = JaredNyts_PunishingGrayRavenNodeNames.FACE_SHADER if type is TextureType.FACE else \
-                JaredNyts_PunishingGrayRavenNodeNames.MAIN_SHADER
+            shader_node_name = JaredNyts_WutheringWavesNodeNames.FACE_SHADER if type is TextureType.FACE else \
+                JaredNyts_WutheringWavesNodeNames.MAIN_SHADER
             if type is not TextureType.FACE:  # TODO: Something is wrong when LUT enabled on face
                 self.set_lut_value(material, shader_node_name, True)
 
@@ -992,7 +998,7 @@ class PunishingGrayRavenTextureImporter(GenshinTextureImporter):
         lut_value = 1.0 if enabled else 0.0
 
         material.node_tree.nodes.get(shader_node_name) \
-            .inputs.get(JaredNyts_PunishingGrayRavenNodeNames.USE_LUT).default_value = lut_value
+            .inputs.get(JaredNyts_WutheringWavesNodeNames.USE_LUT).default_value = lut_value
 
     def set_eye_diffuse_texture(self, material, img):
         eye_node = material.node_tree.nodes.get(self.texture_node_names.EYE)
@@ -1012,7 +1018,6 @@ class PunishingGrayRavenTextureImporter(GenshinTextureImporter):
 
         if metallic_matcap_node:
             metallic_matcap_node.nodes[self.texture_node_names.METALLIC_MATCAP].image = img
-
 
 class PunishingGrayRavenAvatarTextureImporter(PunishingGrayRavenTextureImporter):
     def __init__(self, material_names: ShaderMaterialNames, texture_node_names: TextureNodeNames):
@@ -1140,3 +1145,160 @@ class PunishingGrayRavenChibiTextureImporter(PunishingGrayRavenTextureImporter):
 
     def import_textures(self, directory):
         pass
+
+class WutheringWavesTextureImporter(GenshinTextureImporter):
+    def __init__(self, game_type: GameType, character_type: TextureImporterType, texture_node_names: TextureNodeNames):
+        super().__init__(game_type, character_type)
+        self.texture_node_names: TextureNodeNames = texture_node_names
+
+    def set_diffuse_texture(self, type: TextureType, material, img, override=False):
+        img.colorspace_settings.name = 'sRGB'
+
+        base_diffuse_node = material.node_tree.nodes.get(self.texture_node_names.DIFFUSE)
+        eye_diffuse_node = material.node_tree.nodes.get(self.texture_node_names.EYE_DIFFUSE)
+        face_diffuse_node = material.node_tree.nodes.get(self.texture_node_names.FACE_DIFFUSE)
+        hair_diffuse_node = material.node_tree.nodes.get(self.texture_node_names.HAIR_DIFFUSE)        
+        bangs_diffuse_node = material.node_tree.nodes.get(self.texture_node_names.BANGS_DIFFUSE)
+
+        for diffuse_node in [base_diffuse_node, eye_diffuse_node, face_diffuse_node, hair_diffuse_node, bangs_diffuse_node]:
+            if diffuse_node:
+                diffuse_node.image = img
+
+    def set_mask_texture(self, type: TextureType, material, img):
+        img.colorspace_settings.name = 'Non-Color'
+        base_mask_node = material.node_tree.nodes.get(self.texture_node_names.MASK)
+        face_mask_node = material.node_tree.nodes.get(self.texture_node_names.FACE_MASK) 
+        
+        for mask_node in [base_mask_node, face_mask_node]:
+            if mask_node:
+                mask_node.image = img
+
+    def set_hairmap_texture(self, type: TextureType, material, img):
+        img.colorspace_settings.name = 'Non-Color'
+        hair_hairmap_node = material.node_tree.nodes.get(self.texture_node_names.HAIR_HM)
+        bangs_hairmap_node = material.node_tree.nodes.get(self.texture_node_names.BANGS_HM) 
+        
+        for hairmap_node in [hair_hairmap_node, bangs_hairmap_node]:
+            if hairmap_node:
+                hairmap_node.image = img
+
+    def set_normalmap_texture(self, type: TextureType, material, img):
+        img.colorspace_settings.name = 'Non-Color'
+        base_normalmap_node = material.node_tree.nodes.get(self.texture_node_names.NORMALMAP)
+        hair_normalmap_node = material.node_tree.nodes.get(self.texture_node_names.HAIR_NOMAL) 
+        bangs_normalmap_node = material.node_tree.nodes.get(self.texture_node_names.BANGS_NOMAL) 
+
+        for normalmap_node in [base_normalmap_node, hair_normalmap_node, bangs_normalmap_node]:
+            if normalmap_node:
+                normalmap_node.image = img
+
+    def set_het_texture(self, type: TextureType, material, img):
+        img.colorspace_settings.name = 'Non-Color'
+        eye_het_node = material.node_tree.nodes.get(self.texture_node_names.EYE_HET)
+        face_het_node = material.node_tree.nodes.get(self.texture_node_names.FACE_HET)
+
+        for het_node in [eye_het_node, face_het_node]:
+            if het_node:
+                het_node.image = img
+
+    def set_metalmap_texture(self, img):
+        metallic_matcap_node = bpy.data.node_groups.get(self.texture_node_names.METALLIC_MATCAP_NODE_GROUP)
+
+        if metallic_matcap_node:
+            metallic_matcap_node.nodes[self.texture_node_names.METALLIC_MATCAP].image = img
+
+
+class WutheringWavesAvatarTextureImporter(WutheringWavesTextureImporter):
+    def __init__(self, material_names: ShaderMaterialNames, texture_node_names: TextureNodeNames):
+        super().__init__(GameType.WUTHERING_WAVES, TextureImporterType.WW_AVATAR, texture_node_names)
+        self.material_names = material_names
+        
+    def import_textures(self, directory):
+        for name, folder, files in os.walk(directory):
+            self.files = files
+            for file in files:
+                # 画像ファイルのみ処理（拡張子チェックを追加）
+                if not file.lower().endswith(('.png', '.tga', '.dds', '.jpg', '.jpeg')):
+                    continue
+                
+                # 安全なパス構築
+                img_path = os.path.join(directory, file)
+                
+                try:
+                    img = bpy.data.images.load(filepath=img_path, check_existing=True)
+                    img.alpha_mode = 'CHANNEL_PACKED'
+                except Exception as e:
+                    print(f'Error loading image {file}: {str(e)}')
+                    continue
+
+                print(f'Importing texture {file} using {self.__class__.__name__}')
+                
+                # マテリアル識別サービスを使用して部位名を取得
+                material_identifier_service = WutheringWavesMaterialIdentifierService()
+                texture_body_part_name = material_identifier_service.get_body_part_name(file)
+                
+                if not texture_body_part_name:
+                    continue
+                
+                # 部位に対応するマテリアルを取得
+                materials = [material for material in bpy.data.materials 
+                           if material.name.replace(JaredNytsWutheringWavesShaderMaterialNames.MATERIAL_PREFIX, '') 
+                           in texture_body_part_name]
+                
+                if materials:
+                    material = bpy.data.materials.get(max([m.name for m in materials], key=len))
+                    img = self.reload_texture(img, img_path)  # 重複テクスチャの再読み込み
+
+                    # テクスチャタイプ別の処理
+                    if '_D' in file:
+                        if 'Eye' in file:
+                            self.set_diffuse_texture(TextureType.FACE, material, img)
+                        elif 'Face' in file:
+                            self.set_diffuse_texture(TextureType.FACE, material, img)
+                        elif 'Hair' in file:
+                            self.set_diffuse_texture(TextureType.HAIR, material, img)
+                        elif 'Bangs' in file:
+                            self.set_diffuse_texture(TextureType.HAIR, material, img)
+                        else:
+                            self.set_diffuse_texture(TextureType.BODY, material, img)
+                            
+                    elif '_ID' in file:
+                        if 'Face' in file:
+                            self.set_mask_texture(TextureType.FACE, material, img)
+                        else:
+                            self.set_mask_texture(TextureType.BODY, material, img)
+                            
+                    elif '_N' in file:
+                        if 'Hair' in file:
+                            self.set_normalmap_texture(TextureType.HAIR, material, img)
+                        elif 'Bangs' in file:
+                            self.set_normalmap_texture(TextureType.HAIR, material, img)
+                        else:
+                            self.set_normalmap_texture(TextureType.BODY, material, img)
+                            
+                    elif '_HM' in file:
+                        if 'Hair' in file:
+                            self.set_hairmap_texture(TextureType.HAIR, material, img)
+                        elif 'Bangs' in file:
+                            self.set_hairmap_texture(TextureType.HAIR, material, img)
+                            
+                    elif '_HET' in file:
+                        if 'Eye' in file:
+                            self.set_het_texture(TextureType.FACE, material, img)
+                        elif 'Face' in file:
+                            self.set_het_texture(TextureType.FACE, material, img)
+                            
+                    else:
+                        print(f'WARN: Unexpected texture {file}')
+                else:
+                    print(f'WARN: Material not found for {texture_body_part_name}')
+
+    # テクスチャ再読み込み処理（PGR実装を流用）
+    def reload_texture(self, img, img_path):
+        image_exists = [image for image in bpy.data.images.values() if image.name == img.name]
+        if image_exists:
+            print(f'Reloading texture! {img}')
+            bpy.data.images.remove(image_exists[0])
+            img = bpy.data.images.load(filepath=img_path, check_existing=True)
+            img.alpha_mode = 'CHANNEL_PACKED'
+        return img

@@ -7,7 +7,7 @@ from bpy.types import Operator, Context
 
 from setup_wizard.domain.shader_node_names import StellarToonShaderNodeNames
 from setup_wizard.domain.shader_identifier_service import GenshinImpactShaders, HonkaiStarRailShaders, ShaderIdentifierService, ShaderIdentifierServiceFactory
-from setup_wizard.domain.shader_material_names import JaredNytsPunishingGrayRavenShaderMaterialNames, StellarToonShaderMaterialNames, V3_BonnyFestivityGenshinImpactMaterialNames, V2_FestivityGenshinImpactMaterialNames, ShaderMaterialNames, Nya222HonkaiStarRailShaderMaterialNames
+from setup_wizard.domain.shader_material_names import JaredNytsWutheringWavesShaderMaterialNames, JaredNytsPunishingGrayRavenShaderMaterialNames, StellarToonShaderMaterialNames, V3_BonnyFestivityGenshinImpactMaterialNames, V2_FestivityGenshinImpactMaterialNames, ShaderMaterialNames, Nya222HonkaiStarRailShaderMaterialNames
 
 from setup_wizard.domain.game_types import GameType
 from setup_wizard.material_import_setup.empty_names import LightDirectionEmptyNames
@@ -32,7 +32,12 @@ NAME_OF_DRESS2_MASK_INPUT = 'Input_24'
 NAME_OF_DRESS2_MATERIAL_INPUT = 'Input_25'
 NAME_OF_OUTLINE_OTHER_MASK_INPUT = 'Input_26'
 NAME_OF_OUTLINE_OTHER_MATERIAL_INPUT = 'Input_27'
-
+NAME_OF_OUTLINE_5_MASK_INPUT = 'Input_28'
+NAME_OF_OUTLINE_5_MATERIAL_INPUT = 'Input_29'
+NAME_OF_OUTLINE_6_MASK_INPUT = 'Input_30'
+NAME_OF_OUTLINE_6_MATERIAL_INPUT = 'Input_31'
+NAME_OF_OUTLINE_7_MASK_INPUT = 'Input_32'
+NAME_OF_OUTLINE_7_MATERIAL_INPUT = 'Input_33'
 LIGHT_VECTORS_LIGHT_DIRECTION = 'Input_3'
 LIGHT_VECTORS_HEAD_ORIGIN = 'Input_4'
 LIGHT_VECTORS_HEAD_FORWARD = 'Input_5'
@@ -43,7 +48,10 @@ outline_mask_to_material_mapping = {
     NAME_OF_OUTLINE_1_MASK_INPUT: NAME_OF_OUTLINE_1_MATERIAL_INPUT,
     NAME_OF_OUTLINE_2_MASK_INPUT: NAME_OF_OUTLINE_2_MATERIAL_INPUT,
     NAME_OF_OUTLINE_3_MASK_INPUT: NAME_OF_OUTLINE_3_MATERIAL_INPUT,
-    NAME_OF_OUTLINE_4_MASK_INPUT: NAME_OF_OUTLINE_4_MATERIAL_INPUT
+    NAME_OF_OUTLINE_4_MASK_INPUT: NAME_OF_OUTLINE_4_MATERIAL_INPUT,
+    NAME_OF_OUTLINE_5_MASK_INPUT: NAME_OF_OUTLINE_5_MATERIAL_INPUT,
+    NAME_OF_OUTLINE_6_MASK_INPUT: NAME_OF_OUTLINE_6_MATERIAL_INPUT,
+    NAME_OF_OUTLINE_7_MASK_INPUT: NAME_OF_OUTLINE_7_MATERIAL_INPUT
 }
 
 gi_meshes_to_create_outlines_on = [
@@ -77,10 +85,18 @@ pgr_meshes_to_create_outlines_on = [
     'Clothes',
 ]
 
+ww_meshes_to_create_outlines_on = [
+    'Down',
+    'Upper',
+    'Cloth',
+    'Clothes',
+]
+
 meshes_to_create_outlines_on = \
     gi_meshes_to_create_outlines_on + \
     hsr_meshes_to_create_outlines_on + \
-    pgr_meshes_to_create_outlines_on
+    pgr_meshes_to_create_outlines_on + \
+    ww_meshes_to_create_outlines_on
 
 meshes_to_create_light_vectors_on = meshes_to_create_outlines_on + [
     'Brow',
@@ -118,6 +134,11 @@ class GameGeometryNodesSetupFactory:
                 if bpy.data.node_groups.get(outline_node_group_name):
                     return V2_PunishingGrayRavenGeometryNodesSetup(blender_operator, context)
             return PunishingGrayRavenGeometryNodesSetup(blender_operator, context)
+        elif game_type == GameType.WUTHERING_WAVES.name:
+            for outline_node_group_name in OutlineNodeGroupNames.V2_JAREDNYTS_WW_OUTLINES:
+                if bpy.data.node_groups.get(outline_node_group_name):
+                    return V2_WutheringWavesGeometryNodesSetup(blender_operator, context)
+            return WutheringWavesGeometryNodesSetup(blender_operator, context)
         else:
             raise Exception(f'Unknown {GameType}: {game_type}')
 
@@ -605,3 +626,61 @@ class V2_PunishingGrayRavenGeometryNodesSetup(GameGeometryNodesSetup):
                 geometry_nodes_modifier.node_group = outlines_node_group
             self.set_up_modifier_default_values(geometry_nodes_modifier, mesh)
         return geometry_nodes_modifier
+
+class V2_WutheringWavesGeometryNodesSetup(GameGeometryNodesSetup):
+    GEOMETRY_NODES_MATERIAL_IGNORE_LIST = []
+    MESH_IGNORE_LIST = []
+    DEFAULT_OUTLINE_THICKNESS = 0.12
+
+    def __init__(self, blender_operator, context):
+        super().__init__(blender_operator, context)
+        self.material_names = JaredNytsWutheringWavesShaderMaterialNames
+        self.outlines_node_group_names = OutlineNodeGroupNames.V2_JAREDNYTS_WW_OUTLINES
+        self.light_vectors_node_group_names = OutlineNodeGroupNames.V3_LIGHT_VECTORS_GEOMETRY_NODES  # support V3 Light Vectors w/ V2 Outlines
+
+    def setup_geometry_nodes(self):
+        self.clone_outlines(self.material_names)
+        character_armature = [obj for obj in bpy.data.objects if obj.type == 'ARMATURE'][0]  # Expecting 1 armature in scene
+        character_armature_mesh_names = [obj.name for obj in character_armature.children if obj.type == 'MESH']
+
+        for mesh_name in character_armature_mesh_names:  # It is important that this is created and placed before Outlines!!
+            for object_name, object_data in bpy.context.scene.objects.items():
+                if object_data.type == 'MESH' and (mesh_name == object_name or f'_{mesh_name}' in object_name):
+                    self.create_light_vectors_modifier(f'{object_name}{BODY_PART_SUFFIX}')
+
+        local_mesh_names_to_create_geometry_nodes_on = [
+            mesh.name for mesh in bpy.data.meshes if [
+                material for material in mesh.materials if material.name.startswith(JaredNytsWutheringWavesShaderMaterialNames.MATERIAL_PREFIX)
+            ]
+        ]
+        local_mesh_names_to_create_geometry_nodes_on = [
+            mesh_name for mesh_name in local_mesh_names_to_create_geometry_nodes_on if 
+                'Eye' not in mesh_name and
+                'Alpha' not in mesh_name
+        ]
+        for mesh_name in [item for item in local_mesh_names_to_create_geometry_nodes_on]:
+            for object_name, object_data in bpy.context.scene.objects.items():
+                if object_data.type == 'MESH' and (mesh_name.lower() in object_name.lower()):
+                    self.create_geometry_nodes_modifier(f'{object_name}{BODY_PART_SUFFIX}')
+                    self.fix_meshes_by_setting_genshin_materials(object_name)
+
+        face_meshes = [mesh for mesh_name, mesh in bpy.data.meshes.items() if 'face' in mesh_name.lower()]
+        self.fix_face_outlines_by_reordering_material_slots(face_meshes)
+
+    def create_geometry_nodes_modifier(self, mesh_name):
+        mesh = bpy.context.scene.objects[mesh_name]
+
+        for outlines_node_group_name in self.outlines_node_group_names:
+            outlines_node_group = bpy.data.node_groups.get(outlines_node_group_name)
+            geometry_nodes_modifier = mesh.modifiers.get(f'{NAME_OF_GEOMETRY_NODES_MODIFIER} {mesh_name}')
+
+            if not outlines_node_group:
+                continue
+
+            if not geometry_nodes_modifier:
+                geometry_nodes_modifier = mesh.modifiers.new(f'{NAME_OF_GEOMETRY_NODES_MODIFIER} {mesh_name}', 'NODES')
+                geometry_nodes_modifier.node_group = outlines_node_group
+            self.set_up_modifier_default_values(geometry_nodes_modifier, mesh)
+            geometry_nodes_modifier["Input_6"] = 1.0  # アウトライン用のInput_6を1に設定
+        return geometry_nodes_modifier
+

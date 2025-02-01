@@ -1,9 +1,9 @@
 bl_info = {
-    "name": "HoYoverse Setup Wizard",
-    "author": "Mken, OctavoPE, Enthralpy",
+    "name": "Setup Wizard - WuWa Beta Version",
+    "author": "Mken, OctavoPE, Enthralpy, fnoji",
     "version": (2, 6, 4),
     "blender": (3, 3, 0),
-    "location": "3D View > Sidebar > Genshin Impact / Honkai Star Rail / Punishing Gray Raven",
+    "location": "3D View > Sidebar > Genshin Impact / Honkai Star Rail / Punishing Gray Raven / Wuthering Waves",
     "description": "An addon to streamline the character model setup process when using Festivity, Nya222's or JaredNyts' Shaders",
     "warning": "",
     "doc_url": "",
@@ -56,11 +56,21 @@ from setup_wizard.ui.pgr_ui_setup_wizard_menu import \
     PGR_PT_UI_Materials_Menu, \
     PGR_PT_UI_Outlines_Menu, \
     PGR_PT_UI_Finish_Setup_Menu
+from setup_wizard.ui.ww_ui_setup_wizard_menu import \
+    WW_PT_Setup_Wizard_UI_Layout, \
+    WW_PT_Basic_Setup_Wizard_UI_Layout, \
+    WW_PT_Advanced_Setup_Wizard_UI_Layout, \
+    WW_PT_UI_Character_Model_Menu, \
+    WW_PT_UI_Materials_Menu, \
+    WW_PT_UI_Outlines_Menu, \
+    WW_PT_UI_Finish_Setup_Menu
 
 from setup_wizard.genshin_import_character_model import GI_OT_SetUpCharacter, HSR_OT_SetUpCharacter
 
 import setup_wizard.genshin_setup_wizard
-from setup_wizard.genshin_setup_wizard import GI_OT_GenshinSetupWizardUI, HSR_OT_HonkaiStarRailSetupWizardUI, PGR_OT_SetupWizardUI, register as register_genshin_setup_wizard, setup_dependencies
+from setup_wizard.genshin_setup_wizard import GI_OT_GenshinSetupWizardUI, HSR_OT_HonkaiStarRailSetupWizardUI, PGR_OT_SetupWizardUI, WW_OT_SetupWizardUI, register as register_genshin_setup_wizard, setup_dependencies
+
+from setup_wizard.ww_unmute_material_nodes import WW_OT_UnmuteMaterialNodes
 
 register_genshin_setup_wizard()
 setup_dependencies()
@@ -113,7 +123,16 @@ classes = [
     PGR_PT_UI_Materials_Menu,
     PGR_PT_UI_Outlines_Menu,
     PGR_PT_UI_Finish_Setup_Menu,
+    WW_PT_Setup_Wizard_UI_Layout,
+    WW_PT_Basic_Setup_Wizard_UI_Layout,
+    WW_PT_Advanced_Setup_Wizard_UI_Layout,
+    WW_PT_UI_Character_Model_Menu,
+    WW_PT_UI_Materials_Menu,
+    WW_PT_UI_Outlines_Menu,
+    WW_PT_UI_Finish_Setup_Menu,
+    WW_OT_SetupWizardUI,
     ClearCacheOperator,
+    WW_OT_UnmuteMaterialNodes,
 ]
 
 for module in modules:

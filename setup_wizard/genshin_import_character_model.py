@@ -35,6 +35,12 @@ class HSR_OT_SetUpCharacter(Operator, BasicSetupUIOperator):
     bl_label = 'Honkai Star Rail: Set Up Character (UI)'
 
 
+class WW_OT_SetUpCharacter(Operator, BasicSetupUIOperator):
+    '''Sets Up Character'''
+    bl_idname = 'wuthering_waves.set_up_character'
+    bl_label = 'Wuthering Waves: Set Up Character (UI)'
+
+
 class GI_OT_GenshinImportModel(Operator, ImportHelper, CustomOperatorProperties):
     """Select the folder with the desired model to import"""
     bl_idname = "genshin.import_model"  # important since its how we chain file dialogs

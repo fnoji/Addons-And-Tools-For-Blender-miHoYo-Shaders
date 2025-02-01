@@ -53,3 +53,8 @@ class HonkaiStarRailTestOperatorExecutioner(TestOperatorExecutioner):
 class PunishingGrayRavenTestOperatorExecutioner(TestOperatorExecutioner):
     def __init__(self, operator_name, file_directory='', filepath='', files=[], config={}):
         super().__init__(operator_name, file_directory, filepath, files, config, GameType.PUNISHING_GRAY_RAVEN.name)
+
+
+class WutheringWavesTestOperatorExecutioner(TestOperatorExecutioner):
+    def __init__(self, operator_name, file_directory='', filepath='', files=[], config={}):
+        super().__init__(operator_name, file_directory, filepath, files, config, GameType.WUTHERING_WAVES.name)        

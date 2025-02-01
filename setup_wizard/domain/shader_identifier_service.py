@@ -5,8 +5,8 @@ from abc import abstractmethod
 from enum import Enum, auto
 
 from setup_wizard.domain.game_types import GameType
-from setup_wizard.domain.shader_material_names import JaredNytsPunishingGrayRavenShaderMaterialNames, Nya222HonkaiStarRailShaderMaterialNames, StellarToonShaderMaterialNames, V3_BonnyFestivityGenshinImpactMaterialNames, V2_FestivityGenshinImpactMaterialNames
-from setup_wizard.texture_import_setup.texture_node_names import GenshinImpactTextureNodeNames, JaredNytsPunishingGrayRavenTextureNodeNames, Nya222HonkaiStarRailTextureNodeNames, StellarToonTextureNodeNames
+from setup_wizard.domain.shader_material_names import JaredNytsWutheringWavesShaderMaterialNames, JaredNytsPunishingGrayRavenShaderMaterialNames, Nya222HonkaiStarRailShaderMaterialNames, StellarToonShaderMaterialNames, V3_BonnyFestivityGenshinImpactMaterialNames, V2_FestivityGenshinImpactMaterialNames
+from setup_wizard.texture_import_setup.texture_node_names import JaredNytsWutheringWavesTextureNodeNames, GenshinImpactTextureNodeNames, JaredNytsPunishingGrayRavenTextureNodeNames, Nya222HonkaiStarRailTextureNodeNames, StellarToonTextureNodeNames
 
 
 class GenshinImpactShaders(Enum):
@@ -18,9 +18,11 @@ class HonkaiStarRailShaders(Enum):
     NYA222_HONKAI_STAR_RAIL_SHADER = auto()
     STELLARTOON_HONKAI_STAR_RAIL_SHADER = auto()
 
-
 class PunishingGrayRavenShaders(Enum):
     V1_JAREDNYTS_PUNISHING_GRAY_RAVEN_SHADER = auto()
+
+class WutheringWavesShaders(Enum):
+    V2_JAREDNYTS_WUTHERING_WAVES_SHADER = auto()
 
 class ShaderIdentifierServiceFactory:
     def create(game_type):
@@ -30,6 +32,8 @@ class ShaderIdentifierServiceFactory:
             return HonkaiStarRailShaderIdentifierService()
         elif game_type == GameType.PUNISHING_GRAY_RAVEN.name:
             return PunishingGrayRavenShaderIdentifierService()
+        elif game_type == GameType.WUTHERING_WAVES.name:
+            return WutheringWavesShaderIdentifierService()
         else:
             raise Exception(f'Unexpected input GameType "{game_type}" for ShaderIdentifierServiceFactory')
 
@@ -74,6 +78,8 @@ class ShaderIdentifierService:
             return Nya222HonkaiStarRailShaderMaterialNames
         elif game_type == GameType.PUNISHING_GRAY_RAVEN.name:
             return JaredNytsPunishingGrayRavenShaderMaterialNames
+        elif game_type == GameType.WUTHERING_WAVES.name:
+            return JaredNytsWutheringWavesShaderMaterialNames
         else:
             raise Exception(f'Unknown {GameType}: {game_type}')
 
@@ -88,6 +94,8 @@ class ShaderIdentifierService:
             return StellarToonShaderMaterialNames
         elif shader is PunishingGrayRavenShaders.V1_JAREDNYTS_PUNISHING_GRAY_RAVEN_SHADER:
             return JaredNytsPunishingGrayRavenShaderMaterialNames
+        elif shader is WutheringWavesShaders.V2_JAREDNYTS_WUTHERING_WAVES_SHADER:
+            return JaredNytsWutheringWavesShaderMaterialNames
         else:
             raise Exception(f'Unknown Shader: {shader}')
 
@@ -102,6 +110,8 @@ class ShaderIdentifierService:
             return StellarToonTextureNodeNames
         elif shader is PunishingGrayRavenShaders.V1_JAREDNYTS_PUNISHING_GRAY_RAVEN_SHADER:
             return JaredNytsPunishingGrayRavenTextureNodeNames
+        elif shader is WutheringWavesShaders.V2_JAREDNYTS_WUTHERING_WAVES_SHADER:
+            return JaredNytsWutheringWavesTextureNodeNames
         else:
             raise Exception(f'Unknown Shader: {shader}')
 
@@ -169,3 +179,20 @@ class PunishingGrayRavenShaderIdentifierService(ShaderIdentifierService):
 
     def __init__(self):
         super().__init__()
+
+class WutheringWavesShaderIdentifierService(ShaderIdentifierService):
+    V2_NAMES_OF_WW_MATERIALS = [
+        JaredNytsWutheringWavesShaderMaterialNames.ALPHA,
+        JaredNytsWutheringWavesShaderMaterialNames.EYE,
+        JaredNytsWutheringWavesShaderMaterialNames.FACE,
+        JaredNytsWutheringWavesShaderMaterialNames.HAIR,
+        JaredNytsWutheringWavesShaderMaterialNames.MAIN,
+        JaredNytsWutheringWavesShaderMaterialNames.OUTLINES,
+    ]
+    material_lists_to_search_through = {
+        WutheringWavesShaders.V2_JAREDNYTS_WUTHERING_WAVES_SHADER: V2_NAMES_OF_WW_MATERIALS
+    }
+
+    def __init__(self):
+        super().__init__()
+

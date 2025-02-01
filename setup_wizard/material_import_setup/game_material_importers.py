@@ -7,10 +7,11 @@ from bpy.types import Operator, Context
 from setup_wizard.domain.game_types import GameType
 from setup_wizard.domain.shader_material_names import StellarToonShaderMaterialNames, V3_BonnyFestivityGenshinImpactMaterialNames, \
     V2_FestivityGenshinImpactMaterialNames, Nya222HonkaiStarRailShaderMaterialNames, \
-    JaredNytsPunishingGrayRavenShaderMaterialNames
+    JaredNytsPunishingGrayRavenShaderMaterialNames, JaredNytsWutheringWavesShaderMaterialNames
 from setup_wizard.import_order import NextStepInvoker, cache_using_cache_key, get_cache, \
     GENSHIN_IMPACT_ROOT_FOLDER_FILE_PATH, GENSHIN_IMPACT_SHADER_FILE_PATH, HONKAI_STAR_RAIL_ROOT_FOLDER_FILE_PATH, \
-    HONKAI_STAR_RAIL_SHADER_FILE_PATH, PUNISHING_GRAY_RAVEN_ROOT_FOLDER_FILE_PATH, PUNISHING_GRAY_RAVEN_SHADER_FILE_PATH
+    HONKAI_STAR_RAIL_SHADER_FILE_PATH, PUNISHING_GRAY_RAVEN_ROOT_FOLDER_FILE_PATH, PUNISHING_GRAY_RAVEN_SHADER_FILE_PATH, \
+    WUTHERING_WAVES_ROOT_FOLDER_FILE_PATH, WUTHERING_WAVES_SHADER_FILE_PATH
 from setup_wizard.material_import_setup.empty_names import LightDirectionEmptyNames
 from setup_wizard.outline_import_setup.outline_node_groups import OutlineNodeGroupNames
 
@@ -23,6 +24,8 @@ class GameMaterialImporterFactory:
             return HonkaiStarRailMaterialImporterFacade(blender_operator, context)
         elif game_type == GameType.PUNISHING_GRAY_RAVEN.name:
             return PunishingGrayRavenMaterialImporterFacade(blender_operator, context)
+        elif game_type == GameType.WUTHERING_WAVES.name:
+            return WutheringWavesMaterialImporterFacade(blender_operator, context)
         else:
             raise Exception(f'Unknown {GameType}: {game_type}')
 
@@ -273,6 +276,49 @@ class PunishingGrayRavenMaterialImporterFacade(GameMaterialImporter):
 
     def import_materials(self):
         status = super().import_materials()  # Punishing Gray Raven Material Importer
+
+        # EXEC_DEFAULT hits this if INVOKE_DEFAULT is executed above.
+        # Ensure it ends here otherwise it will error below due to the materia
+        if status == {'FINISHED'}:
+            return status
+
+        cache_enabled = self.context.window_manager.cache_enabled
+        project_root_directory_file_path = self.blender_operator.file_directory \
+            or get_cache(cache_enabled).get(self.game_shader_folder_path) \
+            or os.path.dirname(self.blender_operator.filepath)
+
+        NextStepInvoker().invoke(
+            self.blender_operator.next_step_idx, 
+            self.blender_operator.invoker_type, 
+            file_path_to_cache=project_root_directory_file_path,
+            high_level_step_name=self.blender_operator.high_level_step_name,
+            game_type=self.blender_operator.game_type,
+        )
+
+class WutheringWavesMaterialImporterFacade(GameMaterialImporter):
+    DEFAULT_BLEND_FILE_WITH_WW_MATERIALS = 'WW_ShaderV2.blend'
+    NAMES_OF_WUTHERING_WAVES_MATERIALS = [
+        {'name': JaredNytsWutheringWavesShaderMaterialNames.BANGS},
+        {'name': JaredNytsWutheringWavesShaderMaterialNames.EYE},
+        {'name': JaredNytsWutheringWavesShaderMaterialNames.FACE},
+        {'name': JaredNytsWutheringWavesShaderMaterialNames.HAIR},
+        {'name': JaredNytsWutheringWavesShaderMaterialNames.MAIN},
+        {'name': JaredNytsWutheringWavesShaderMaterialNames.OUTLINES},
+        {'name': JaredNytsWutheringWavesShaderMaterialNames.RESONATOR},
+    ]
+
+    def __init__(self, blender_operator, context):
+        super().__init__(
+            blender_operator,
+            context,
+            WUTHERING_WAVES_SHADER_FILE_PATH,
+            WUTHERING_WAVES_ROOT_FOLDER_FILE_PATH,
+            self.DEFAULT_BLEND_FILE_WITH_WW_MATERIALS,
+            self.NAMES_OF_WUTHERING_WAVES_MATERIALS
+        )
+
+    def import_materials(self):
+        status = super().import_materials()  # Wuthering Waves Material Importer
 
         # EXEC_DEFAULT hits this if INVOKE_DEFAULT is executed above.
         # Ensure it ends here otherwise it will error below due to the materia

@@ -141,3 +141,16 @@ class JaredNytsPunishingGrayRavenShaderMaterialNames(ShaderMaterialNames):
     BODY = f'{MATERIAL_PREFIX}Body'
     XDEFAULTMATERIAL = f'{MATERIAL_PREFIX}XDefaultMaterial'  # Chibi Body
     CHIBIFACE = 'ChibiFace'  # Chibi Face
+
+class JaredNytsWutheringWavesShaderMaterialNames(ShaderMaterialNames):
+    MATERIAL_PREFIX = 'WW - '
+    MAIN = f'{MATERIAL_PREFIX}Main'
+    UP = f'{MATERIAL_PREFIX}Up'  # 追加
+    DOWN = f'{MATERIAL_PREFIX}Down'  # 追加
+    LEISI = f'{MATERIAL_PREFIX}Leisi'  # 追加
+    BANGS = f'{MATERIAL_PREFIX}Bangs'
+    EYE = f'{MATERIAL_PREFIX}Eye'
+    FACE = f'{MATERIAL_PREFIX}Face'
+    HAIR = f'{MATERIAL_PREFIX}Hair'
+    OUTLINES = f'{MATERIAL_PREFIX}Outlines'
+    RESONATOR = f'{MATERIAL_PREFIX}ResonatorStar'

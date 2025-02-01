@@ -26,6 +26,8 @@ class MaterialDefaultValueSetterFactory:
             return HonkaiStarRailMaterialDefaultValueSetter()
         elif game_type == GameType.PUNISHING_GRAY_RAVEN.name:
             return PunishingGrayRavenMaterialDefaultValueSetter()
+        elif game_type == GameType.WUTHERING_WAVES.name:
+            return WutheringWavesMaterialDefaultValueSetter()
         else:
             raise Exception(f'Unknown {GameType}: {game_type}')
 
@@ -97,6 +99,14 @@ class HonkaiStarRailMaterialDefaultValueSetter(MaterialDefaultValueSetter):
 
 
 class PunishingGrayRavenMaterialDefaultValueSetter(MaterialDefaultValueSetter):
+    def __init__(self) -> None:
+        return
+
+    def set_default_values(self):
+        return
+
+
+class WutheringWavesMaterialDefaultValueSetter(MaterialDefaultValueSetter):
     def __init__(self) -> None:
         return
 

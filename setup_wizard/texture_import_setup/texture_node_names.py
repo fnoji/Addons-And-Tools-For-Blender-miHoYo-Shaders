@@ -45,6 +45,19 @@ class TextureNodeNames:
     METALLIC_MATCAP_NODE_GROUP = ''
     METALLIC_MATCAP = ''
 
+    # WW
+    EYE = ''
+    FACE_DIFFUSE = ''
+    FACE_HEAO_NODE_GROUP = ''
+    FACE_HEAO = ''
+    FACE_LUT = ''
+    CHIBI_FACE = ''
+    LUT = ''
+    NORMALMAP = ''
+    PBR = ''
+    METALLIC_MATCAP_NODE_GROUP = ''
+    METALLIC_MATCAP = ''
+
 class GenshinImpactTextureNodeNames(TextureNodeNames):
     BODY_DIFFUSE_UV0 = 'Body_Diffuse_UV0'
 
@@ -120,6 +133,36 @@ class JaredNytsPunishingGrayRavenTextureNodeNames(TextureNodeNames):
     FACE_HEAO_NODE_GROUP = 'Face HEAO'
     FACE_HEAO = 'Face_Lightmap.004'
     CHIBI_FACE = 'Image Texture'
+
+    # Metallic Matcap
+    METALLIC_MATCAP_NODE_GROUP = 'Metallic Matcap'
+    METALLIC_MATCAP = 'MetalMap'
+
+class JaredNytsWutheringWavesTextureNodeNames(TextureNodeNames):
+    # Common, reused across shader
+    DIFFUSE = 'Base Color'
+    MASK = 'Mask ID'
+    EMISSION = 'Image Texture'
+    NORMALMAP = 'Normal Map'
+
+    # Eyes
+    EYE_DIFFUSE = 'Eye Diffuse'
+    EYE_HET = 'Eye HET'
+
+    # Face
+    FACE_DIFFUSE = 'Face Diffuse'
+    FACE_HET = 'Face HET'
+    FACE_MASK = 'Mask ID'
+
+    # Hair
+    HAIR_DIFFUSE = 'Hair Diffuse'
+    HAIR_HM = 'Hair HM'
+    HAIR_NOMAL = 'Normal Map'
+
+    # Bangs
+    BANGS_DIFFUSE = 'Bangs Diffuse'
+    BANGS_HM = 'Bangs HM'
+    BANGS_NOMAL = 'Normal Map'
 
     # Metallic Matcap
     METALLIC_MATCAP_NODE_GROUP = 'Metallic Matcap'

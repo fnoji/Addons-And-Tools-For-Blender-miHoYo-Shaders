@@ -48,3 +48,10 @@ class JaredNyts_PunishingGrayRavenNodeNames(ShaderNodeNames):
     MAIN_SHADER = 'Group.001'
     FACE_SHADER = 'Group'
     USE_LUT = 'Use LUT = 1, No LUT = 0'
+
+class JaredNyts_WutheringWavesNodeNames(ShaderNodeNames):
+    MAIN_SHADER = 'Main Shader'
+    FACE_SHADER = 'Face Shader'
+    HAIR_SHADER = 'Hair Shader'
+    USE_LUT = 'Use LUT = 1, No LUT = 0'
+    

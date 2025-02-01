@@ -63,6 +63,23 @@ class PGR_OT_SetupWizardUI(Operator, BasicSetupUIOperator):
         )
         return {'FINISHED'}
 
+class WW_OT_SetupWizardUI(Operator, BasicSetupUIOperator):
+    '''Runs through entire setup process'''
+    bl_idname = 'wuthering_waves.setup_wizard_ui'
+    bl_label = 'Genshin: Setup Wizard (UI)'
+
+    def execute(self, context):
+        next_step_index = 0
+
+        NextStepInvoker().invoke(
+            next_step_index,
+            'invoke_next_step_ui', 
+            high_level_step_name=self.bl_idname if bpy.app.version >= (3,3,0) >= (3,3,0) \
+                else self.bl_idname + '_no_outlines',
+            game_type=self.game_type,
+        )
+        return {'FINISHED'}
+
 
 class GI_OT_GenshinSetupWizard(Operator):
     """Setup Wizard Process"""
@@ -198,6 +215,7 @@ def setup_dependencies():
         setup_wizard.misc_operations.PGR_OT_PaintVertexColors,
         setup_wizard.misc_operations.PGR_OT_PaintFaceShadowTexture,
         setup_wizard.misc_operations.PGR_OT_PaintVertexEraseFaceAlpha,
+        setup_wizard.misc_operations.WW_OT_PaintVertexEraseFaceAlpha,
         setup_wizard.join_meshes_on_armature.join_meshes_operator.GI_OT_JoinMeshesOnArmature,
         setup_wizard.character_rig_setup.character_rigger_operator.GI_OT_CharacterRiggerOperator,
         setup_wizard.character_rig_setup.rootshape_filepath_setter_operator.GI_OT_RootShape_FilePath_Setter_Operator,

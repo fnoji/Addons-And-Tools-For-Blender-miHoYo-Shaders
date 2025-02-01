@@ -438,6 +438,41 @@ class PGR_OT_PaintVertexEraseFaceAlpha(Operator, CustomOperatorProperties):
             )
         return {'FINISHED'}
 
+class WW_OT_PaintVertexEraseFaceAlpha(Operator, CustomOperatorProperties):
+    '''Paint Vertex Colors'''
+    bl_idname = 'wuthering_waves.paint_vertex_erase_face_alpha'
+    bl_label = 'Wuthering Waves: Paint Vertex Colors'
+
+    def execute(self, context):
+        # The outlines must be enabled on viewport for erasing to work! (not sure why)
+        meshes = [obj for obj in bpy.data.objects.values() if obj.type == 'MESH']
+        for mesh in meshes:
+            for modifier in mesh.modifiers.values():
+                modifier.show_viewport = True
+
+        # 'Col' color attribute/vertex color must be selected as active!
+        face_mesh = [mesh for mesh in bpy.data.meshes.values() if 'Face' in mesh.name][0]  # expecting Face mesh
+        face_mesh.vertex_colors['Col'].active = True
+
+        bpy.ops.paint.vertex_paint_toggle()
+        bpy.context.object.data.use_paint_mask = True
+        bpy.data.brushes["Draw"].blend = 'ERASE_ALPHA'
+        bpy.context.scene.tool_settings.unified_paint_settings.size = 500
+        bpy.data.brushes["Draw"].strength = 1
+        bpy.data.brushes["Draw"].use_frontface = False
+        bpy.data.brushes["Draw"].curve_preset = 'CONSTANT'
+
+        # Tap on the face once to erase the outlines on the eyes and lips
+
+        if self.next_step_idx:
+            NextStepInvoker().invoke(
+                self.next_step_idx, 
+                self.invoker_type, 
+                high_level_step_name=self.high_level_step_name,
+                game_type=self.game_type,
+            )
+        return {'FINISHED'}
+
 
 register, unregister = bpy.utils.register_classes_factory([
     GI_OT_SetColorManagementToStandard,

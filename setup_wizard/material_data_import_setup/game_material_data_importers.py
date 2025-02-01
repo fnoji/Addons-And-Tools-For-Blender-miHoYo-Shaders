@@ -9,7 +9,7 @@ from bpy.types import Operator, Context, Material
 
 from setup_wizard.domain.shader_identifier_service import GenshinImpactShaders, HonkaiStarRailShaders, ShaderIdentifierService, \
     ShaderIdentifierServiceFactory
-from setup_wizard.domain.shader_material_names import JaredNytsPunishingGrayRavenShaderMaterialNames, StellarToonShaderMaterialNames, V3_BonnyFestivityGenshinImpactMaterialNames, V2_FestivityGenshinImpactMaterialNames, \
+from setup_wizard.domain.shader_material_names import JaredNytsWutheringWavesShaderMaterialNames, JaredNytsPunishingGrayRavenShaderMaterialNames, StellarToonShaderMaterialNames, V3_BonnyFestivityGenshinImpactMaterialNames, V2_FestivityGenshinImpactMaterialNames, \
     Nya222HonkaiStarRailShaderMaterialNames
 from setup_wizard.domain.character_types import CharacterType
 
@@ -168,6 +168,9 @@ class GameMaterialDataImporterFactory:
         elif game_type == GameType.PUNISHING_GRAY_RAVEN.name:
             material_names = JaredNytsPunishingGrayRavenShaderMaterialNames
             return PunishingGrayRavenMaterialDataImporter(blender_operator, context, outline_material_group, material_names)
+        elif game_type == GameType.WUTHERING_WAVES.name:
+            material_names = JaredNytsWutheringWavesShaderMaterialNames
+            return WutheringWavesMaterialDataImporter(blender_operator, context, outline_material_group, material_names)
         else:
             raise Exception(f'Unknown {GameType}: {game_type}')
 
@@ -329,3 +332,20 @@ class PunishingGrayRavenMaterialDataImporter(GameMaterialDataImporter):
 
     def import_material_data(self):
         return {'FINISHED'}
+
+class WutheringWavesMaterialDataImporter(GameMaterialDataImporter):
+    def __init__(self, blender_operator, context, outline_material_group: OutlineMaterialGroup, material_names):
+        self.blender_operator: Operator = blender_operator
+        self.context: Context = context
+        self.parsers = [
+            HoyoStudioMaterialDataJsonParser,
+            UnknownHoyoStudioMaterialDataJsonParser,
+            UABEMaterialDataJsonParser,
+        ]
+        self.material = outline_material_group.material
+        self.outlines_material = outline_material_group.outlines_material
+        self.material_names = material_names
+
+    def import_material_data(self):
+        return {'FINISHED'}
+

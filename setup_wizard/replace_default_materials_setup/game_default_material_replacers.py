@@ -5,14 +5,15 @@ import bpy
 from abc import ABC, abstractmethod
 from bpy.types import Context, Operator
 from setup_wizard.domain.shader_node_names import StellarToonShaderNodeNames
-from setup_wizard.domain.material_identifier_service import PunishingGrayRavenMaterialIdentifierService
+from setup_wizard.domain.material_identifier_service import PunishingGrayRavenMaterialIdentifierService, WutheringWavesMaterialIdentifierService
 
 from setup_wizard.import_order import get_actual_material_name_for_dress
 from setup_wizard.domain.game_types import GameType
 from setup_wizard.domain.shader_identifier_service import GenshinImpactShaders, HonkaiStarRailShaders, ShaderIdentifierService, \
     ShaderIdentifierServiceFactory
 from setup_wizard.domain.shader_material_names import StellarToonShaderMaterialNames, V3_BonnyFestivityGenshinImpactMaterialNames, V2_FestivityGenshinImpactMaterialNames, \
-    ShaderMaterialNames, Nya222HonkaiStarRailShaderMaterialNames, JaredNytsPunishingGrayRavenShaderMaterialNames
+    ShaderMaterialNames, Nya222HonkaiStarRailShaderMaterialNames, JaredNytsPunishingGrayRavenShaderMaterialNames, \
+    JaredNytsWutheringWavesShaderMaterialNames
 from setup_wizard.texture_import_setup.texture_importer_types import TextureImporterType
 
 
@@ -42,6 +43,8 @@ class GameDefaultMaterialReplacerFactory:
                 return StellarToonDefaultMaterialReplacer(blender_operator, context, StellarToonShaderMaterialNames)
         elif game_type == GameType.PUNISHING_GRAY_RAVEN.name:
             return PunishingGrayRavenDefaultMaterialReplacer(blender_operator, context)
+        elif game_type == GameType.WUTHERING_WAVES.name:
+            return WutheringWavesDefaultMaterialReplacer(blender_operator, context)
         else:
             raise Exception(f'Unknown {GameType}: {game_type}')
 
@@ -492,6 +495,107 @@ class PunishingGrayRavenDefaultMaterialReplacer(GameDefaultMaterialReplacer):
         body_material = bpy.data.materials.get(material_name)
         if not body_material:
             body_material = bpy.data.materials.get(material_type).copy()
+            body_material.name = material_name
+            body_material.use_fake_user = True
+        return body_material
+
+class WutheringWavesDefaultMaterialReplacer(GameDefaultMaterialReplacer):
+    MESH_IGNORE_LIST = []
+
+    def __init__(self, blender_operator, context):
+        self.blender_operator: Operator = blender_operator
+        self.context: Context = context
+
+    def replace_default_materials(self):
+        meshes = [mesh for mesh in bpy.context.scene.objects if mesh.type == 'MESH' and mesh.name not in self.MESH_IGNORE_LIST]
+
+        for mesh in meshes:
+            for material_slot in mesh.material_slots:
+                material_name = material_slot.name
+                material_identifier_service = WutheringWavesMaterialIdentifierService()
+                mesh_body_part_name = material_identifier_service.get_body_part_name(material_name) or \
+                    self.find_body_part_name(material_name)  # If in different naming schema, fallback to best guess mode
+                mesh_body_part_name = \
+                    material_identifier_service.get_body_part_name_of_shared_material(material_name) or \
+                    mesh_body_part_name
+                if 'Bangs' in mesh_body_part_name:  # 6.Karenina_Ember (material w/ Face in it, but no called just Face)
+                    mesh_body_part_name = 'Bangs'
+                if 'Eye' in mesh_body_part_name:  # 6.Karenina_Ember (material w/ Face in it, but no called just Face)
+                    mesh_body_part_name = 'Eye'
+                if 'Face' in mesh_body_part_name:  # 6.Karenina_Ember (material w/ Face in it, but no called just Face)
+                    mesh_body_part_name = 'Face'
+                if 'Hair' in mesh_body_part_name:  # 6.Karenina_Ember (material w/ Face in it, but no called just Face)
+                    mesh_body_part_name = 'Hair'                
+
+                if mesh_body_part_name:
+                    material_type = getattr(JaredNytsWutheringWavesShaderMaterialNames, mesh_body_part_name.upper(), None) or \
+                        JaredNytsWutheringWavesShaderMaterialNames.MAIN
+                    material_name = f'{JaredNytsWutheringWavesShaderMaterialNames.MATERIAL_PREFIX}{mesh_body_part_name}'
+                    self.create_main_material(mesh, material_type, material_name)
+                else:
+                    self.blender_operator.report({'WARNING'}, f'Ignoring unknown mesh body part in character model: {mesh_body_part_name} / Material: {material_name}')
+                    continue
+
+                wuthering_waves_material = bpy.data.materials.get(
+                    f'{JaredNytsWutheringWavesShaderMaterialNames.MATERIAL_PREFIX}{mesh_body_part_name}'
+                )
+
+                if wuthering_waves_material:
+                    material_slot.material = wuthering_waves_material
+                else:
+                    self.blender_operator.report({'WARNING'}, f'Ignoring unknown mesh body part in character model: {mesh_body_part_name} / Material: {material_name}')
+                    continue
+        self.blender_operator.report({'INFO'}, 'Replaced default materials with Genshin shader materials...')
+
+    def find_body_part_name(self, material_name):
+        expected_format_body_part_name = self.__expected_format_body_part_name_search(material_name)
+        naive_search_body_part_name = self.__naive_body_part_name_search(material_name)
+        body_part_name = ''
+
+        # If the two are equal, then we're confident that the body part name is correct (pick either)
+        # Elif the naive search found none of the expected body part names, return expected format search body part name
+        # Else expected format and naive searches do not equal, use the naive search (pulls from list of expected body part names)
+        if expected_format_body_part_name == naive_search_body_part_name:
+            body_part_name = expected_format_body_part_name
+        elif expected_format_body_part_name and not naive_search_body_part_name:
+            body_part_name = expected_format_body_part_name
+        else:
+            return naive_search_body_part_name
+        return body_part_name
+
+    '''
+    Expected Format Search: Search for body part name at expected location, at the end of the material name (ex. 'Body')
+    '''
+    def __expected_format_body_part_name_search(self, material_name):
+        armature =  [object for object in bpy.data.objects if object.type == 'ARMATURE'][0]
+        return material_name.split(armature.name)[-1]
+
+    '''
+    Naive Search: Search for body part name in material name
+    '''
+    def __naive_body_part_name_search(self, material_name):
+        EXPECTED_BODY_PART_NAMES = [
+            'Bangs',
+            'Hair',
+            'Face',
+            'Up',
+            'Down',
+            'Leisi',
+            'Eye',  # Default to Body last
+        ]
+
+        for expected_body_part_name in EXPECTED_BODY_PART_NAMES:
+            if expected_body_part_name in material_name:
+                return expected_body_part_name
+
+    def create_main_material(self, mesh, material_type: ShaderMaterialNames, material_name):
+        body_material = bpy.data.materials.get(material_name)
+        if not body_material:
+            # マテリアルタイプ名から直接取得するように変更
+            base_material = bpy.data.materials.get(material_type)
+            if not base_material:
+                base_material = bpy.data.materials.get(JaredNytsWutheringWavesShaderMaterialNames.MAIN)
+            body_material = base_material.copy()
             body_material.name = material_name
             body_material.use_fake_user = True
         return body_material

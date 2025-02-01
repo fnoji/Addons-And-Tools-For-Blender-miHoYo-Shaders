@@ -25,6 +25,12 @@ class HSR_OT_SetUpMaterials(Operator, BasicSetupUIOperator):
     bl_label = 'Honkai Star Rail: Set Up Materials (UI)'
 
 
+class WW_OT_SetUpMaterials(Operator, BasicSetupUIOperator):
+    '''Sets Up Materials'''
+    bl_idname = 'wuthering_waves.set_up_materials'
+    bl_label = 'Wuthering Waves: Set Up Materials (UI)'
+
+
 class GI_OT_GenshinImportMaterials(Operator, ImportHelper, CustomOperatorProperties):
     """Select the .blend file with Shader materials to import"""
     bl_idname = "genshin.import_materials"  # important since its how we chain file dialogs

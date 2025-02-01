@@ -19,6 +19,12 @@ class HSR_OT_FinishSetup(Operator, BasicSetupUIOperator):
     bl_label = 'Honkai Star Rail: Finish Setup (UI)'
 
 
+class WW_OT_FinishSetup(Operator, BasicSetupUIOperator):
+    '''Finish Setup'''
+    bl_idname = 'wuthering_waves.finish_setup'
+    bl_label = 'Wuthering Waves: Finish Setup (UI)'
+
+
 class GI_OT_FixTransformations(Operator, CustomOperatorProperties):
     '''Makes the Character Upright and Fixes Scale'''
     bl_idname = 'genshin.fix_transformations'
