@@ -145,9 +145,13 @@ class JaredNytsPunishingGrayRavenShaderMaterialNames(ShaderMaterialNames):
 class JaredNytsWutheringWavesShaderMaterialNames(ShaderMaterialNames):
     MATERIAL_PREFIX = 'WW - '
     MAIN = f'{MATERIAL_PREFIX}Main'
-    UP = f'{MATERIAL_PREFIX}Up'  # 追加
-    DOWN = f'{MATERIAL_PREFIX}Down'  # 追加
-    LEISI = f'{MATERIAL_PREFIX}Leisi'  # 追加
+    UP = f'{MATERIAL_PREFIX}Up'
+    DOWN = f'{MATERIAL_PREFIX}Down'
+    LEISI = f'{MATERIAL_PREFIX}Leisi'
+    ALPHA = f'{MATERIAL_PREFIX}Alpha'
+    CLOTH = f'{MATERIAL_PREFIX}Cloth'
+    HAT = f'{MATERIAL_PREFIX}Hat'
+    BODY = f'{MATERIAL_PREFIX}Body'
     BANGS = f'{MATERIAL_PREFIX}Bangs'
     EYE = f'{MATERIAL_PREFIX}Eye'
     FACE = f'{MATERIAL_PREFIX}Face'

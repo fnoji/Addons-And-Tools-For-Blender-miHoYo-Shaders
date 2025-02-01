@@ -518,14 +518,16 @@ class WutheringWavesDefaultMaterialReplacer(GameDefaultMaterialReplacer):
                 mesh_body_part_name = \
                     material_identifier_service.get_body_part_name_of_shared_material(material_name) or \
                     mesh_body_part_name
-                if 'Bangs' in mesh_body_part_name:  # 6.Karenina_Ember (material w/ Face in it, but no called just Face)
+                if 'Bangs' in mesh_body_part_name: 
                     mesh_body_part_name = 'Bangs'
-                if 'Eye' in mesh_body_part_name:  # 6.Karenina_Ember (material w/ Face in it, but no called just Face)
+                if 'Eye' in mesh_body_part_name:  
                     mesh_body_part_name = 'Eye'
-                if 'Face' in mesh_body_part_name:  # 6.Karenina_Ember (material w/ Face in it, but no called just Face)
+                if 'Face' in mesh_body_part_name: 
                     mesh_body_part_name = 'Face'
-                if 'Hair' in mesh_body_part_name:  # 6.Karenina_Ember (material w/ Face in it, but no called just Face)
-                    mesh_body_part_name = 'Hair'                
+                if 'Hair' in mesh_body_part_name:  
+                    mesh_body_part_name = 'Hair'         
+                if 'Star' in mesh_body_part_name:  
+                    mesh_body_part_name = 'ResonatorStar'
 
                 if mesh_body_part_name:
                     material_type = getattr(JaredNytsWutheringWavesShaderMaterialNames, mesh_body_part_name.upper(), None) or \
@@ -545,7 +547,7 @@ class WutheringWavesDefaultMaterialReplacer(GameDefaultMaterialReplacer):
                 else:
                     self.blender_operator.report({'WARNING'}, f'Ignoring unknown mesh body part in character model: {mesh_body_part_name} / Material: {material_name}')
                     continue
-        self.blender_operator.report({'INFO'}, 'Replaced default materials with Genshin shader materials...')
+        self.blender_operator.report({'INFO'}, 'Replaced default materials with Wuthering Waves shader materials...')
 
     def find_body_part_name(self, material_name):
         expected_format_body_part_name = self.__expected_format_body_part_name_search(material_name)
@@ -580,8 +582,13 @@ class WutheringWavesDefaultMaterialReplacer(GameDefaultMaterialReplacer):
             'Face',
             'Up',
             'Down',
+            'ResonatorStar',
             'Leisi',
-            'Eye',  # Default to Body last
+            'Eye',
+            'Cloth',
+            'Alpha',
+            'Hat',
+            'Body',  # Default to Body last
         ]
 
         for expected_body_part_name in EXPECTED_BODY_PART_NAMES:

@@ -241,7 +241,7 @@ class WW_PT_UI_Materials_Menu(Panel):
         OperatorFactory.create(
             sub_layout,
             'ww.unmute_material_nodes',
-            'Unmute Material Nodes',
+            'Optimize Material Nodes',
             'NODE',
             game_type=GameType.WUTHERING_WAVES.name,
         )

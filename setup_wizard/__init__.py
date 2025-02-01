@@ -1,5 +1,5 @@
 bl_info = {
-    "name": "Setup Wizard - WuWa Beta Version",
+    "name": "Setup Wizard - WuWa Beta Version 2025/02/01",
     "author": "Mken, OctavoPE, Enthralpy, fnoji",
     "version": (2, 6, 4),
     "blender": (3, 3, 0),

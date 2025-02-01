@@ -95,7 +95,7 @@ class PunishingGrayRavenMaterialIdentifierService:
         return body_part_name
 
 class WutheringWavesMaterialIdentifierService:
-    BODY_PART_NAMES = ['Up', 'Down', 'Leisi', 'Bangs', 'Eye', 'Face', 'Hair', 'Main', 'Outlines', 'Resonator']
+    BODY_PART_NAMES = ['Up', 'Down', 'Leisi', 'Bangs', 'Eye', 'Face', 'Hair', 'Main', 'Hat', 'Cloth', 'Body', 'Alpha', 'Outlines']
 
     def get_body_part_name(self, material_name: str) -> Optional[str]:
         # 数字と特殊文字を除去して最後の有効な部位名を抽出
